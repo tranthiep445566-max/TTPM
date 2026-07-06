@@ -56,9 +56,40 @@ Lưu ý: chỉ publishable key (`sb_publishable_...`) được đặt trong code
 
 ## 7. Đưa lên GitHub Pages
 
-1. Tạo repo GitHub mới, đẩy toàn bộ thư mục này lên (không cần build, không cần Node.js).
-2. Vào **Settings > Pages** của repo, chọn source là branch `main`, thư mục `/ (root)`.
-3. Chờ vài phút, GitHub sẽ cấp link dạng `https://<username>.github.io/<repo>/`.
+Thư mục này đã được chuẩn bị sẵn dưới dạng Git repo cục bộ (đã `git init` + commit). Chọn 1 trong 2 cách sau.
+
+### Bước chung: Tạo repo trên GitHub
+
+1. Vào [github.com](https://github.com), đăng nhập (hoặc **Sign up** miễn phí nếu chưa có tài khoản).
+2. Bấm dấu **+** ở góc trên phải > **New repository**.
+3. Đặt tên repo, ví dụ `phan-mem-quan-ly-du-an`. Để **Public** hoặc **Private** đều được (GitHub Pages hoạt động với cả 2 loại).
+4. **Không** tick "Add a README file" — để repo trống hoàn toàn.
+5. Bấm **Create repository**.
+
+### Cách A — Kéo thả file qua trình duyệt (không cần cài gì)
+
+1. Ở trang repo vừa tạo, bấm dòng chữ **"uploading an existing file"**.
+2. Mở thư mục `Phần mềm CV` trên máy, chọn hết toàn bộ file và thư mục con bên trong (Ctrl+A), kéo thả vào khung upload của GitHub.
+3. Cuộn xuống, bấm **Commit changes**.
+4. Nhược điểm: mỗi lần sau này tôi sửa code, bạn phải lặp lại thao tác kéo thả này để cập nhật.
+
+### Cách B — Dùng Git (tôi đã chuẩn bị sẵn, chỉ cần bạn nối vào repo GitHub)
+
+1. Sau khi tạo repo xong, GitHub hiện ra 1 địa chỉ dạng `https://github.com/ten-ban/phan-mem-quan-ly-du-an.git` — copy địa chỉ đó.
+2. Mở terminal tại thư mục `Phần mềm CV` (hoặc nhờ tôi chạy giúp), chạy:
+```
+git remote add origin <dán địa chỉ vừa copy vào đây>
+git push -u origin main
+```
+3. Lần đầu chạy `git push`, máy sẽ tự mở trình duyệt để bạn đăng nhập GitHub — đăng nhập xong là push xong.
+4. Từ lần sau, mỗi khi tôi sửa code xong, chỉ cần chạy lại `git push` (hoặc nhờ tôi chạy) để cập nhật lên GitHub, không cần kéo thả thủ công nữa.
+
+### Bật GitHub Pages
+
+1. Vào tab **Settings** của repo > mục **Pages** (menu bên trái).
+2. Ở **Build and deployment > Source**, chọn **Deploy from a branch**.
+3. **Branch**: chọn `main`, thư mục `/ (root)` > **Save**.
+4. Chờ 1-2 phút, tải lại trang, GitHub sẽ hiện link dạng `https://<tên-tài-khoản>.github.io/<tên-repo>/`.
 
 Publishable key có trong code là an toàn để public (thiết kế của Supabase), nên bạn có thể để repo public bình thường.
 
