@@ -40,10 +40,15 @@ export default {
 
     async function load() {
       loading.value = true;
-      [commissions.value, projects.value, employees.value, allPayments.value] = await Promise.all([
-        listCommissions(), listProjects(), listEmployees(), listAllCommissionPayments()
-      ]);
-      loading.value = false;
+      try {
+        [commissions.value, projects.value, employees.value, allPayments.value] = await Promise.all([
+          listCommissions(), listProjects(), listEmployees(), listAllCommissionPayments()
+        ]);
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     const summary = computed(() => {

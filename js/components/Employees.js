@@ -37,7 +37,12 @@ export default {
     const stats = ref(null);
     const statsTarget = ref(null);
 
-    async function load() { loading.value = true; rows.value = await listEmployees(); loading.value = false; }
+    async function load() {
+      loading.value = true;
+      try { rows.value = await listEmployees(); }
+      catch (e) { toast(e.message, 'error'); }
+      finally { loading.value = false; }
+    }
 
     function openCreate() { Object.assign(createForm, emptyCreateForm()); createOpen.value = true; }
     async function submitCreate() {
@@ -106,7 +111,7 @@ export default {
       <Modal v-model="createOpen" title="Thêm nhân viên">
         <div class="form-row">
           <div class="form-group"><label>Email *</label><input class="input" v-model="createForm.email" /></div>
-          <div class="form-group"><label>Mật khẩu tạm *</label><input class="input" v-model="createForm.password" /></div>
+          <div class="form-group"><label>Mật khẩu tạm *</label><input class="input" type="password" autocomplete="new-password" v-model="createForm.password" /></div>
         </div>
         <div class="form-group"><label>Họ tên *</label><input class="input" v-model="createForm.full_name" /></div>
         <div class="form-row">

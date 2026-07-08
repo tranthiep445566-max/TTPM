@@ -26,8 +26,13 @@ export default {
 
     async function load() {
       loading.value = true;
-      rows.value = await listQuotes();
-      loading.value = false;
+      try {
+        rows.value = await listQuotes();
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     function askDelete(row) { toDelete.value = row; confirmOpen.value = true; }

@@ -45,8 +45,13 @@ export default {
 
     async function load() {
       loading.value = true;
-      [rows.value, customers.value, employees.value] = await Promise.all([listProjects(), listCustomers(), listEmployees()]);
-      loading.value = false;
+      try {
+        [rows.value, customers.value, employees.value] = await Promise.all([listProjects(), listCustomers(), listEmployees()]);
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     function openCreate() {

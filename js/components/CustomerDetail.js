@@ -24,17 +24,22 @@ export default {
 
     async function load() {
       loading.value = true;
-      const id = route.params.id;
-      const [cust, projs, quotesData, atts] = await Promise.all([
-        getCustomer(id), getCustomerProjects(id), getCustomerQuotes(id), getCustomerAttachments(id)
-      ]);
-      customer.value = cust;
-      const finMap = await fetchFinancialsMap(projs.map(p => p.id));
-      projs.forEach(p => { p.financials = finMap[p.id] || { paid_amount: 0, debt_amount: p.total_amount }; });
-      projects.value = projs;
-      quotes.value = quotesData;
-      attachments.value = atts;
-      loading.value = false;
+      try {
+        const id = route.params.id;
+        const [cust, projs, quotesData, atts] = await Promise.all([
+          getCustomer(id), getCustomerProjects(id), getCustomerQuotes(id), getCustomerAttachments(id)
+        ]);
+        customer.value = cust;
+        const finMap = await fetchFinancialsMap(projs.map(p => p.id));
+        projs.forEach(p => { p.financials = finMap[p.id] || { paid_amount: 0, debt_amount: p.total_amount }; });
+        projects.value = projs;
+        quotes.value = quotesData;
+        attachments.value = atts;
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     async function onFileChange(e) {

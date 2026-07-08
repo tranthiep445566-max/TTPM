@@ -1,5 +1,6 @@
 const { ref, onMounted, nextTick } = Vue;
 import { getClient } from '../supabaseClient.js';
+import { toast } from '../state.js';
 import { formatCurrency, formatDate, daysLeft, statusLabel, PROJECT_STATUS_OPTIONS } from '../utils.js';
 import { listAuditLog } from '../api/auditLog.js';
 import { fetchFinancialsMap } from '../api/projects.js';
@@ -27,8 +28,10 @@ export default {
 
     async function load() {
       loading.value = true;
+      try {
       const sb = getClient();
-      const { data: projects } = await sb.from('projects').select('*');
+      const { data: projects, error: projErr } = await sb.from('projects').select('*');
+      if (projErr) throw projErr;
       const [finMap, customersCountRes, employeesCountRes, projectModulesRes, paidInstallmentsRes, notifsRes, auditRows] = await Promise.all([
         fetchFinancialsMap(projects.map(p => p.id)),
         sb.from('customers').select('id', { count: 'exact', head: false }),
@@ -84,6 +87,10 @@ export default {
       loading.value = false;
       await nextTick();
       drawCharts(projects, projectModules || [], paidInstallments || []);
+      } catch (e) {
+        toast(e.message, 'error');
+        loading.value = false;
+      }
     }
 
     function drawCharts(projects, projectModules, paidInstallments) {

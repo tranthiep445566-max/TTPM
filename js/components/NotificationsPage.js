@@ -1,6 +1,6 @@
 const { ref, onMounted } = Vue;
 import { listNotifications, markAllRead } from '../api/notifications.js';
-import { state } from '../state.js';
+import { state, toast } from '../state.js';
 import { formatDateTime } from '../utils.js';
 
 export default {
@@ -11,8 +11,13 @@ export default {
 
     async function load() {
       loading.value = true;
-      rows.value = await listNotifications();
-      loading.value = false;
+      try {
+        rows.value = await listNotifications();
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     async function markAll() {

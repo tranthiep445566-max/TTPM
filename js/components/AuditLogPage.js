@@ -1,5 +1,6 @@
 const { ref, onMounted } = Vue;
 import { listAuditLog } from '../api/auditLog.js';
+import { toast } from '../state.js';
 import { formatDateTime } from '../utils.js';
 import DataTable from './common/DataTable.js';
 
@@ -17,7 +18,12 @@ export default {
   setup() {
     const rows = ref([]);
     const loading = ref(true);
-    async function load() { loading.value = true; rows.value = await listAuditLog(300); loading.value = false; }
+    async function load() {
+      loading.value = true;
+      try { rows.value = await listAuditLog(300); }
+      catch (e) { toast(e.message, 'error'); }
+      finally { loading.value = false; }
+    }
     onMounted(load);
     return { rows, loading, COLUMNS };
   },

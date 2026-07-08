@@ -32,17 +32,22 @@ export default {
 
     async function load() {
       loading.value = true;
-      [projects.value, catalog.value, technologies.value, settings.value] = await Promise.all([
-        listProjects(), listModules(), listTechnologies(), getSettings()
-      ]);
-      if (!isNew) {
-        quote.value = await getQuote(route.params.id);
-        projectId.value = quote.value.project_id;
-        note.value = quote.value.note || '';
-        const rawItems = await getQuoteItems(route.params.id);
-        items.value = rawItems.map(i => ({ ...i, _key: i.id }));
+      try {
+        [projects.value, catalog.value, technologies.value, settings.value] = await Promise.all([
+          listProjects(), listModules(), listTechnologies(), getSettings()
+        ]);
+        if (!isNew) {
+          quote.value = await getQuote(route.params.id);
+          projectId.value = quote.value.project_id;
+          note.value = quote.value.note || '';
+          const rawItems = await getQuoteItems(route.params.id);
+          items.value = rawItems.map(i => ({ ...i, _key: i.id }));
+        }
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
       }
-      loading.value = false;
     }
 
     function addModuleItem() {

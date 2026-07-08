@@ -28,7 +28,12 @@ export default {
     const form = reactive(emptyForm());
     const newCategory = ref('');
 
-    async function load() { loading.value = true; rows.value = await listTechnologies(); loading.value = false; }
+    async function load() {
+      loading.value = true;
+      try { rows.value = await listTechnologies(); }
+      catch (e) { toast(e.message, 'error'); }
+      finally { loading.value = false; }
+    }
 
     const categories = computed(() => [...new Set(['Backend', 'Frontend', 'Database', 'Khac', ...rows.value.map(r => r.category)].filter(Boolean))]);
 

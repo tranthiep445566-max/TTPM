@@ -22,7 +22,12 @@ export default {
     const loading = ref(true);
     const activeRole = ref('manager');
 
-    async function load() { loading.value = true; rows.value = await listAllPermissions(); loading.value = false; }
+    async function load() {
+      loading.value = true;
+      try { rows.value = await listAllPermissions(); }
+      catch (e) { toast(e.message, 'error'); }
+      finally { loading.value = false; }
+    }
 
     const rowsForRole = computed(() => rows.value.filter(r => r.role === activeRole.value));
 

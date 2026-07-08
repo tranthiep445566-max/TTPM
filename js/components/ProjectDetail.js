@@ -54,34 +54,39 @@ export default {
 
     async function load() {
       loading.value = true;
-      project.value = await getProject(projectId);
-      Object.assign(info, {
-        name: project.value.name, customer_id: project.value.customer_id, assignee_id: project.value.assignee_id || '',
-        software_type: project.value.software_type || '', industry: project.value.industry || '',
-        description: project.value.description || '', status: project.value.status
-      });
-      Object.assign(finance, { total_amount: project.value.total_amount, deposit_amount: project.value.deposit_amount });
-      Object.assign(timeline, {
-        start_date: project.value.start_date || '', deadline_date: project.value.deadline_date || '',
-        delivery_date: project.value.delivery_date || '', warranty_months: project.value.warranty_months || 0,
-        warranty_end_date: project.value.warranty_end_date || ''
-      });
-      const [fin, custs, emps, cat, techs, pMods, techRows, insts, atts, qts] = await Promise.all([
-        getProjectFinancials(projectId), listCustomers(), listEmployees(), listModules(), listTechnologies(),
-        listProjectModules(projectId), listProjectTechnologies(projectId), listInstallments(projectId), listAttachments(projectId),
-        listQuotesForProject(projectId)
-      ]);
-      financials.value = fin;
-      customers.value = custs;
-      employees.value = emps;
-      catalog.value = cat;
-      technologies.value = techs;
-      projectModules.value = pMods;
-      selectedTechIds.value = techRows.map(t => t.technology_id);
-      installments.value = insts;
-      attachments.value = atts;
-      quotes.value = qts;
-      loading.value = false;
+      try {
+        project.value = await getProject(projectId);
+        Object.assign(info, {
+          name: project.value.name, customer_id: project.value.customer_id, assignee_id: project.value.assignee_id || '',
+          software_type: project.value.software_type || '', industry: project.value.industry || '',
+          description: project.value.description || '', status: project.value.status
+        });
+        Object.assign(finance, { total_amount: project.value.total_amount, deposit_amount: project.value.deposit_amount });
+        Object.assign(timeline, {
+          start_date: project.value.start_date || '', deadline_date: project.value.deadline_date || '',
+          delivery_date: project.value.delivery_date || '', warranty_months: project.value.warranty_months || 0,
+          warranty_end_date: project.value.warranty_end_date || ''
+        });
+        const [fin, custs, emps, cat, techs, pMods, techRows, insts, atts, qts] = await Promise.all([
+          getProjectFinancials(projectId), listCustomers(), listEmployees(), listModules(), listTechnologies(),
+          listProjectModules(projectId), listProjectTechnologies(projectId), listInstallments(projectId), listAttachments(projectId),
+          listQuotesForProject(projectId)
+        ]);
+        financials.value = fin;
+        customers.value = custs;
+        employees.value = emps;
+        catalog.value = cat;
+        technologies.value = techs;
+        projectModules.value = pMods;
+        selectedTechIds.value = techRows.map(t => t.technology_id);
+        installments.value = insts;
+        attachments.value = atts;
+        quotes.value = qts;
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     async function saveInfo() {

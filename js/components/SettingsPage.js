@@ -25,9 +25,14 @@ export default {
 
     async function load() {
       loading.value = true;
-      const s = await getSettings();
-      Object.assign(form, s);
-      loading.value = false;
+      try {
+        const s = await getSettings();
+        Object.assign(form, s);
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     async function save() {

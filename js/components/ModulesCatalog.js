@@ -33,8 +33,13 @@ export default {
 
     async function load() {
       loading.value = true;
-      rows.value = await listModules();
-      loading.value = false;
+      try {
+        rows.value = await listModules();
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     function openCreate() { Object.assign(form, emptyForm()); editing.value = false; modalOpen.value = true; }

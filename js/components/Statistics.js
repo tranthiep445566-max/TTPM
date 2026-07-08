@@ -1,5 +1,6 @@
 const { ref, reactive, onMounted } = Vue;
 import { getClient } from '../supabaseClient.js';
+import { toast } from '../state.js';
 import { fetchFinancialsMap } from '../api/projects.js';
 import { formatCurrency } from '../utils.js';
 
@@ -18,11 +19,13 @@ export default {
 
     async function load() {
       loading.value = true;
+      try {
       const sb = getClient();
       const fromDt = range.from;
       const toDt = range.to + 'T23:59:59';
 
-      const { data: projects } = await sb.from('projects').select('*').gte('created_at', fromDt).lte('created_at', toDt);
+      const { data: projects, error: projErr } = await sb.from('projects').select('*').gte('created_at', fromDt).lte('created_at', toDt);
+      if (projErr) throw projErr;
       const projectIds = projects.map(p => p.id).length ? projects.map(p => p.id) : ['00000000-0000-0000-0000-000000000000'];
 
       const [finMap, customersNewRes, paidInstallmentsRes, commissionPaymentsRes, projectModulesRes] = await Promise.all([
@@ -64,7 +67,11 @@ export default {
         projectCount: projects.length, customerNewCount: (customersNew || []).length,
         topModules, topEmployees
       };
-      loading.value = false;
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     onMounted(load);

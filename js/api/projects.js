@@ -3,7 +3,7 @@ import { logAction } from '../auth.js';
 
 export async function listProjects() {
   const sb = getClient();
-  const { data, error } = await sb.from('projects').select('*, customers(company_name), profiles(full_name)').order('created_at', { ascending: false });
+  const { data, error } = await sb.from('projects').select('*, customers(company_name), profiles!projects_assignee_id_fkey(full_name)').order('created_at', { ascending: false });
   if (error) throw error;
   const finMap = await fetchFinancialsMap(data.map(p => p.id));
   data.forEach(p => { p.financials = finMap[p.id] || { paid_amount: 0, debt_amount: p.total_amount }; });
@@ -22,7 +22,7 @@ export async function fetchFinancialsMap(projectIds) {
 
 export async function getProject(id) {
   const sb = getClient();
-  const { data, error } = await sb.from('projects').select('*, customers(*), profiles(*)').eq('id', id).single();
+  const { data, error } = await sb.from('projects').select('*, customers(*), profiles!projects_assignee_id_fkey(*)').eq('id', id).single();
   if (error) throw error;
   return data;
 }

@@ -25,6 +25,11 @@ export async function createEmployeeAccount({ email, password, full_name, phone,
   const tempClient = window.supabase.createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data, error } = await tempClient.auth.signUp({ email, password });
   if (error) throw error;
+  // Supabase tra ve "thanh cong" gia (identities rong) khi email da ton tai san,
+  // de tranh lo email - luc nay khong co tai khoan moi nao duoc tao voi mat khau vua nhap.
+  if (!data.user || (Array.isArray(data.user.identities) && data.user.identities.length === 0)) {
+    throw new Error('Email này đã có tài khoản trong Supabase Auth (có thể chưa xác nhận email). Vào Supabase > Authentication > Users để kiểm tra/xóa tài khoản cũ rồi thử lại.');
+  }
   const sb = getClient();
   const { data: profile, error: profErr } = await sb.from('profiles').insert({
     id: data.user.id, email, full_name, phone, position, role, hire_date

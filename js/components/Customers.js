@@ -33,8 +33,13 @@ export default {
 
     async function load() {
       loading.value = true;
-      rows.value = await listCustomers();
-      loading.value = false;
+      try {
+        rows.value = await listCustomers();
+      } catch (e) {
+        toast(e.message, 'error');
+      } finally {
+        loading.value = false;
+      }
     }
 
     function openCreate() {
