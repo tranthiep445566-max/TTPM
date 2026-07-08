@@ -1,11 +1,12 @@
-const { ref, computed, onMounted, onUnmounted } = Vue;
+const { ref, reactive, computed, onMounted, onUnmounted } = Vue;
 const { useRoute } = VueRouter;
-import { state, can } from '../state.js';
-import { signOut } from '../auth.js';
+import { state, can, toast } from '../state.js';
+import { signOut, changePassword } from '../auth.js';
 import { listNotifications, markRead, subscribeNotifications } from '../api/notifications.js';
 import { getSettings } from '../api/settings.js';
 import { roleLabel } from '../utils.js';
 import ToastHost from './common/Toast.js';
+import Modal from './common/Modal.js';
 
 const NAV_ITEMS = [
   { module: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: '🏠' },
@@ -25,11 +26,13 @@ const NAV_ITEMS = [
 
 export default {
   name: 'AppShell',
-  components: { ToastHost },
+  components: { ToastHost, Modal },
   setup() {
     const route = useRoute();
     const sidebarOpen = ref(false);
     const bellOpen = ref(false);
+    const pwModalOpen = ref(false);
+    const pwForm = reactive({ newPassword: '', confirmPassword: '' });
     let unsubscribe = null;
 
     const navItems = computed(() => NAV_ITEMS.filter(i => can(i.module, 'can_view')));
@@ -59,6 +62,21 @@ export default {
       window.location.hash = '#/login';
     }
 
+    function openChangePassword() {
+      Object.assign(pwForm, { newPassword: '', confirmPassword: '' });
+      pwModalOpen.value = true;
+    }
+
+    async function submitChangePassword() {
+      if (!pwForm.newPassword || pwForm.newPassword.length < 6) { toast('Mật khẩu mới phải từ 6 ký tự trở lên', 'error'); return; }
+      if (pwForm.newPassword !== pwForm.confirmPassword) { toast('Mật khẩu nhập lại không khớp', 'error'); return; }
+      try {
+        await changePassword(pwForm.newPassword);
+        toast('Đã đổi mật khẩu thành công');
+        pwModalOpen.value = false;
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
     onMounted(async () => {
       if (!state.companySettings) {
         try { state.companySettings = await getSettings(); } catch (e) { /* ignore */ }
@@ -71,7 +89,7 @@ export default {
     });
     onUnmounted(() => { if (unsubscribe) unsubscribe(); });
 
-    return { state, route, sidebarOpen, bellOpen, navItems, recentNotifications, openBell, readNotification, logout, roleLabel };
+    return { state, route, sidebarOpen, bellOpen, pwModalOpen, pwForm, navItems, recentNotifications, openBell, readNotification, logout, roleLabel, openChangePassword, submitChangePassword };
   },
   template: `
     <div class="app-shell">
@@ -110,6 +128,7 @@ export default {
           <div class="user-menu" v-if="state.profile">
             <span class="user-name">{{ state.profile.full_name }}</span>
             <span class="user-role">{{ roleLabel(state.profile.role) }}</span>
+            <button class="btn btn-sm" @click="openChangePassword">Đổi mật khẩu</button>
             <button class="btn btn-sm" @click="logout">Đăng xuất</button>
           </div>
         </header>
@@ -118,6 +137,15 @@ export default {
         </main>
       </div>
       <ToastHost />
+
+      <Modal v-model="pwModalOpen" title="Đổi mật khẩu">
+        <div class="form-group"><label>Mật khẩu mới *</label><input class="input" type="password" autocomplete="new-password" v-model="pwForm.newPassword" /></div>
+        <div class="form-group"><label>Nhập lại mật khẩu mới *</label><input class="input" type="password" autocomplete="new-password" v-model="pwForm.confirmPassword" /></div>
+        <template #footer>
+          <button class="btn" @click="pwModalOpen = false">Hủy</button>
+          <button class="btn btn-primary" @click="submitChangePassword">Đổi mật khẩu</button>
+        </template>
+      </Modal>
     </div>
   `
 };

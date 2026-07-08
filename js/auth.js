@@ -10,6 +10,12 @@ export async function signIn(email, password) {
   return data;
 }
 
+export async function changePassword(newPassword) {
+  const sb = getClient();
+  const { error } = await sb.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
 export async function signOut() {
   const sb = getClient();
   await sb.auth.signOut();
